@@ -1,3 +1,8 @@
+#this will take 90 files and will create a data matrix #
+#just create a folder with the files in present working directory and edit the path will work fine for you.
+# 
+# we just need naive bayes working on this data.
+
 from sklearn import datasets
 import json
 import  numpy as np
