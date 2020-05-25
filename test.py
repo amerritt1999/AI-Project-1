@@ -19,14 +19,7 @@ data = json.load(fp)
 li = list(data['Equipped'].items())
 
 arr = np.array([li[0]])
-#pi = list(data['Light World'].items())
-#hc = list(data['Hyrule Castle'].items())
-#ep = list(data['Eastern Palace'].items())
 
-#print(len(li))
-#print(len(pi))
-#print(len(hc))
-#print(len(ep))
 
 for i in range(1,3):
     arr = np.append(arr,[li[i]] , axis = 0)
