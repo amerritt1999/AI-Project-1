@@ -31,8 +31,17 @@ arr3 = arr2[2:]
 test = pd.DataFrame(arr3)
 test.columns = ['Item', 'Location']
 
-inputs = test.Item
-target = test.Location
+from sklearn import preprocessing
+oe = preprocessing.OrdinalEncoder()
+le = preprocessing.LabelEncoder()
+
+a = test.Item.values.reshape(-1,1)
+
+test.Item = oe.fit_transform(a)
+test.Location = le.fit_transform(test.Location.values)
+
+inputs = a
+target = test.Location.values
 
 from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(inputs,target,test_size=0.2)
@@ -40,7 +49,6 @@ X_train, X_test, y_train, y_test = train_test_split(inputs,target,test_size=0.2)
 from sklearn.naive_bayes import CategoricalNB
 clf = CategoricalNB()
 
-#This line throws an error for some reason
 clf.fit(X_train, y_train)
 
 clf.score(X_test, y_test)
