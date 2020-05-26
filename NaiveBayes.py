@@ -1,5 +1,5 @@
 from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import MultinomialNB
+from sklearn.naive_bayes import CategoricalNB
 from sklearn import datasets
 import json
 import  numpy as np 
@@ -30,9 +30,17 @@ arr3 = arr2[2:]
 #arr3 should contain items and loctions
 test = pd.DataFrame(arr3)
 test.columns = ['Item', 'Location']
-test.head()
 
-#X_train, X_test, y_train, y_test = train_test_split(inputs,target,test_size=0.2)
-#model = MultinomialNB()
-#model.fit(X_train, y_train)
-#print(model.predict_proba(X_test[:10]))
+inputs = test.Item
+target = test.Location
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(inputs,target,test_size=0.2)
+
+from sklearn.naive_bayes import CategoricalNB
+clf = CategoricalNB()
+
+#This line throws an error for some reason
+clf.fit(X_train, y_train)
+
+clf.score(X_test, y_test)
