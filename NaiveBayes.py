@@ -1,5 +1,6 @@
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import CategoricalNB
+from sklearn import preprocessing
 from sklearn import datasets
 import json
 import  numpy as np 
@@ -9,19 +10,24 @@ from pathlib import Path
 basepath = Path('AI Data/')
 files_in_basepath = (entry for entry in basepath.iterdir() if entry.is_file())
 arr2 = np.matrix('1,2;3,4')
-for item in files_in_basepath:
-    fp = open(item)
-    data = json.load(fp)
-    regions = ['Light World','Hyrule Castle','Eastern Palace' , 'Desert Palace' ,
+regions = ['Light World','Hyrule Castle','Eastern Palace' , 'Desert Palace' ,
            'Death Mountain' , 'Tower Of Hera' , 'Castle Tower' , 'Dark World','Dark Palace' , 
                'Swamp Palace' , 'Skull Woods' , 'Thieves Town','Ice Palace' , 'Misery Mire' , 
                'Turtle Rock' , 'Ganons Tower' , 'Special']
-    
+junkData = ['PieceOfHeart', 'HeartContainer', 'BossHeartContainer', 'OneRupee', 'FiveRupees', 'TwentyRupees', 
+           'FiftyRupees', 'OneHundredRupees', 'ThreeBombs', 'TenBombs', 'TenArrows', 'BugCatchingNet',
+           'ProgressiveShield']
+for item in files_in_basepath:
+    fp = open(item)
+    data = json.load(fp)
     for i in regions:
         li = list(data[i].items())
-        arr = np.matrix([li[0][1].split(':')[0], li[0][0].split(':')[0]])
+        arr = np.matrix([li[0][1].split(':')[0], li[0][0].split(':')[0].split(" - ")[0]])
         for j in range(1,len(li)):
-            arr = np.append(arr , [[li[j][1].split(':')[0], li[j][0].split(':')[0]]] , axis = 0)
+            if li[j][1].split(':')[0] in junkData:
+                arr = np.append(arr , [['junk', li[j][0].split(':')[0].split(' - ')[0]]] , axis = 0)
+            else:
+                arr = np.append(arr , [[li[j][1].split(':')[0], li[j][0].split(':')[0].split(' - ')[0]]] , axis = 0)
         for item in arr:
             arr2 = np.append(arr2, item, axis = 0)
     
@@ -31,16 +37,36 @@ arr3 = arr2[2:]
 test = pd.DataFrame(arr3)
 test.columns = ['Item', 'Location']
 
-from sklearn import preprocessing
 oe = preprocessing.OrdinalEncoder()
 le = preprocessing.LabelEncoder()
 
-a = test.Item.values.reshape(-1,1)
+items = list(test.Item.values)
+locations = list(test.Location.values)
 
-test.Item = oe.fit_transform(a)
+test.Item = oe.fit_transform(test.Item.values.reshape(-1,1))
 test.Location = le.fit_transform(test.Location.values)
 
-inputs = a
+counter = 0
+dict1 = {}
+dict4 = {}
+for i in items:
+    dict1[str(test.Item.values[counter])] = i
+    dict4[i] = test.Item.values[counter]
+    counter+=1
+    
+counter = 0
+dict2 = {}
+for i in locations:
+    dict2[str(test.Location.values[counter])] = i
+    counter+=1
+    
+counter = 0
+dict3 = {}
+for i in dict2:
+    dict3[str(counter)] = dict2[i]
+    counter+=1
+
+inputs = test.Item.values.reshape(-1,1)
 target = test.Location.values
 
 from sklearn.model_selection import train_test_split
@@ -51,4 +77,10 @@ clf = CategoricalNB()
 
 clf.fit(X_train, y_train)
 
-clf.score(X_test, y_test)
+list1 = clf.predict_proba([[dict4['Hammer']], [dict4['Hammer']]])
+
+top_10_idx = np.argsort(list1[0])[-10:]
+top_10_values = [list1[0][i] for i in top_10_idx]
+for i in top_10_idx:
+    print(dict3[str(i)])
+print(top_10_values)
