@@ -69,18 +69,23 @@ for i in dict2:
 inputs = test.Item.values.reshape(-1,1)
 target = test.Location.values
 
-from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(inputs,target,test_size=0.2)
 
-from sklearn.naive_bayes import CategoricalNB
 clf = CategoricalNB()
 
 clf.fit(X_train, y_train)
 
 list1 = clf.predict_proba([[dict4['Hammer']], [dict4['Hammer']]])
 
-top_10_idx = np.argsort(list1[0])[-10:]
-top_10_values = [list1[0][i] for i in top_10_idx]
-for i in top_10_idx:
-    print(dict3[str(i)])
-print(top_10_values)
+top_idx = np.argsort(list1[0])[-len(list1[0]):]
+top_values = [list1[0][i] for i in top_idx]
+counter = 0
+totalPercent = 0
+for i in top_idx[::-1]:
+    if dict3[str(i)] in test2.loc[test2['Item'] == 'unknown'].values:
+        print(dict3[str(i)]+": "+str(top_values[len(list1[0])-counter-1]*100)+"%")
+        totalPercent+=top_values[len(list1[0])-counter-1]*100
+        counter+=1
+    if counter == 10:
+        break
+print("Total Percent: "+str(totalPercent)+"%")
