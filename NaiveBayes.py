@@ -75,17 +75,21 @@ clf = CategoricalNB()
 
 clf.fit(X_train, y_train)
 
-list1 = clf.predict_proba([[dict4['Hammer']], [dict4['Hammer']]])
+list1 = clf.predict_proba([[dict4['Hammer']], [dict4['Lamp']]])
 
-top_idx = np.argsort(list1[0])[-len(list1[0]):]
-top_values = [list1[0][i] for i in top_idx]
-counter = 0
-totalPercent = 0
-for i in top_idx[::-1]:
-    if dict3[str(i)] in test2.loc[test2['Item'] == 'unknown'].values:
-        print(dict3[str(i)]+": "+str(top_values[len(list1[0])-counter-1]*100)+"%")
-        totalPercent+=top_values[len(list1[0])-counter-1]*100
-        counter+=1
-    if counter == 10:
-        break
-print("Total Percent: "+str(totalPercent)+"%")
+j = 0
+for j in range(len(list1)):
+    top_idx = np.argsort(list1[j])[-len(list1[j]):]
+    top_values = [list1[j][i] for i in top_idx]
+    counter = 0
+    totalPercent = 0
+    for i in top_idx[::-1]:
+        if dict3[str(i)] in test2.loc[test2['Item'] == 'unknown'].values:
+            print(dict3[str(i)]+": "+str(top_values[len(list1[j])-counter-1]*100)+"%")
+            totalPercent+=top_values[len(list1[j])-counter-1]*100
+            counter+=1
+        if counter == 10:
+            break
+    print("Total Percent: "+str(totalPercent)+"%")
+    print()
+    j+=1
