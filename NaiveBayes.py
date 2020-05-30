@@ -1,7 +1,8 @@
+import pandas as pd
+from sklearn import datasets
+from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import CategoricalNB
-from sklearn import preprocessing
-from sklearn import datasets
 import json
 import  numpy as np 
 from pathlib import Path
@@ -22,20 +23,43 @@ for item in files_in_basepath:
     data = json.load(fp)
     for i in regions:
         li = list(data[i].items())
-        arr = np.matrix([li[0][1].split(':')[0], li[0][0].split(':')[0].split(" - ")[0]])
+        if li[0][1].split(':')[0] in junkData:
+            arr = np.matrix(['junk', li[0][0].split(':')[0].split(" - ")[0]])
+        else:
+            arr = np.matrix([li[0][1].split(':')[0], li[0][0].split(':')[0].split(" - ")[0]])
         for j in range(1,len(li)):
             if li[j][1].split(':')[0] in junkData:
-                arr = np.append(arr , [['junk', li[j][0].split(':')[0].split(' - ')[0]]] , axis = 0)
+                arr = np.append(arr , [['junk', li[j][0].split(':')[0].split(" - ")[0]]] , axis = 0)
             else:
-                arr = np.append(arr , [[li[j][1].split(':')[0], li[j][0].split(':')[0].split(' - ')[0]]] , axis = 0)
+                arr = np.append(arr , [[li[j][1].split(':')[0], li[j][0].split(':')[0].split(" - ")[0]]] , axis = 0)
         for item in arr:
             arr2 = np.append(arr2, item, axis = 0)
     
 arr3 = arr2[2:]
-#print(arr3)
-#arr3 should contain items and loctions
+
+arr2 = np.matrix('1,2;3,4')
+fp = open("proj1.json")
+data = json.load(fp)
+for i in regions:
+    li = list(data[i].items())
+    if li[0][1].split(':')[0] in junkData:
+        arr = np.matrix(['junk', li[0][0].split(':')[0].split(" - ")[0]])
+    else:
+        arr = np.matrix([li[0][1].split(':')[0], li[0][0].split(':')[0].split(" - ")[0]])
+    for j in range(1,len(li)):
+        if li[j][1].split(':')[0] in junkData:
+            arr = np.append(arr , [['junk', li[j][0].split(':')[0].split(" - ")[0]]] , axis = 0)
+        else:
+            arr = np.append(arr , [[li[j][1].split(':')[0], li[j][0].split(':')[0].split(" - ")[0]]] , axis = 0)
+    for item in arr:
+        arr2 = np.append(arr2, item, axis = 0)
+arr4 = arr2[2:]
+
 test = pd.DataFrame(arr3)
+test2 = pd.DataFrame(arr4)
+
 test.columns = ['Item', 'Location']
+test2.columns = ['Item', 'Location']
 
 oe = preprocessing.OrdinalEncoder()
 le = preprocessing.LabelEncoder()
@@ -48,10 +72,8 @@ test.Location = le.fit_transform(test.Location.values)
 
 counter = 0
 dict1 = {}
-dict4 = {}
 for i in items:
-    dict1[str(test.Item.values[counter])] = i
-    dict4[i] = test.Item.values[counter]
+    dict1[i] = test.Item.values[counter]
     counter+=1
     
 counter = 0
@@ -75,8 +97,18 @@ clf = CategoricalNB()
 
 clf.fit(X_train, y_train)
 
-list1 = clf.predict_proba([[dict4['Hammer']], [dict4['Lamp']]])
+list0 = []
+for i in items:
+    if i != 'junk':
+        list0.append(i)
 
+list2 = []
+for i in list0:
+    list2.append([dict1[i]])
+
+list1 = clf.predict_proba(list2)
+
+dict4 = {}
 j = 0
 for j in range(len(list1)):
     top_idx = np.argsort(list1[j])[-len(list1[j]):]
@@ -85,11 +117,18 @@ for j in range(len(list1)):
     totalPercent = 0
     for i in top_idx[::-1]:
         if dict3[str(i)] in test2.loc[test2['Item'] == 'unknown'].values:
-            print(dict3[str(i)]+": "+str(top_values[len(list1[j])-counter-1]*100)+"%")
+            if dict3[str(i)] not in dict4:
+                dict4[dict3[str(i)]] = str(top_values[len(list1[j])-counter-1]*100)
+            else:
+                if float(dict4[dict3[str(i)]]) < top_values[len(list1[j])-counter-1]*100:
+                    dict4[dict3[str(i)]] = str(top_values[len(list1[j])-counter-1]*100)
             totalPercent+=top_values[len(list1[j])-counter-1]*100
             counter+=1
-        if counter == 10:
-            break
-    print("Total Percent: "+str(totalPercent)+"%")
-    print()
     j+=1
+
+counter = 0
+for i in dict4:
+    print(i+": "+dict4[i]+"%")
+    if counter == 10:
+        break
+    counter+=1
