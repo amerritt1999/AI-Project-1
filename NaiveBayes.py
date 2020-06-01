@@ -98,8 +98,8 @@ clf = CategoricalNB()
 clf.fit(X_train, y_train)
 
 list0 = []
-for i in items:
-    if i != 'junk':
+for i in dict1:
+    if dict1[i] != 'junk':
         list0.append(i)
 
 list2 = []
@@ -128,7 +128,7 @@ for j in range(len(list1)):
 
 counter = 0
 for i in dict4:
-    print(i+": "+dict4[i]+"%")
+    print(i+": "+str(dict4[i])+"%")
     if counter == 10:
         break
     counter+=1
