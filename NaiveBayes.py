@@ -107,10 +107,7 @@ for i in list0:
 
 list1 = clf.predict_proba(list2)
 
-list3 = [list(test2.loc[test2['Location'] == 'Turtle Rock Medallion'].values[0])[1]]
-list3.append(list(test2.loc[test2['Location'] == 'Misery Mire Medallion'].values[0])[1])
-list3.append(list(test2.loc[test2['Location'] == 'Waterfall Bottle'].values[0])[1])
-list3.append(list(test2.loc[test2['Location'] == 'Pyramid Bottle'].values[0])[1])
+list3 = ['Turtle Rock Medallion', 'Misery Mire Medallion', 'Waterfall Bottle', 'Pyramid Bottle']
 
 dict4 = {}
 j = 0
